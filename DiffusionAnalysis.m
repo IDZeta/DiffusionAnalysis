@@ -11,10 +11,9 @@
 % This script takes a full set of diffusion data and produces average images
 % of the MOT at each stage of expansion, as well as a graph of the variance
 % along x and z with respect to expansion time. It also calculates the
-% diffusion constants along those directions and converts them into
-% "G-factors" that Grynberg sometimes reported in his papers on diffusion.
-
-%% Change Log (as of March 5, 2021):
+% diffusion coefficients along those directions and converts them into
+% "G-factors" that Grynberg often reported in his papers on diffusion.
+%% Change Log (as of March 10, 2021):
     % Revised some variable names and changed some spacings
     % Preallocated some arrays that hold important data (times, variance_x/y, etc.)
     % Broke apart the operations within the big FOR loop over each timing folder
@@ -29,7 +28,9 @@
     % Wrapped the calculations for the diffusion coefficients and G-factors,
     % as well as the fitting of the diffusion coefficients, into a new
     % function "CalculateDiffusionCoefs.m"
-    
+    % Plotting now uses a regular set of colors (obtained from "ColorList.m")
+    % and displays each expansion time in the  legend. Things became difficult
+    % to read when many clouds have centers close together
 %% DATA REQUIREMENTS
 % All data folders should be named in the scheme '**ms' for data and '**bg'
 % for backgrounds. These folders go into a folder whose name is the date
@@ -134,16 +135,24 @@ end
 fprintf('Images averaged and fit, variances and center of mass extracted\nReady to plot the clouds\n')
 %% Plotting the Images
 % Go through the lists of points and centers for each cloud and plot them
-% on one graph. For now, label each center with its corresponding expansion
-% time.
+% on one graph. First, generate a common list of colors to cycle through
+% for each cloud.
 figure;
 hold on
+% for i = 1:length(dataFolderList);
+%     colorNum = rand(1,3); % Make ellipse border, center, and label the same color for easy identification
+%     plot(ellipse_X{1,i}, ellipse_Y{1,i}, 'Color', colorNum, 'Linewidth', 2);
+%     plot(x_cen(i), y_cen(i), '*', 'Color', colorNum);
+%     text(x_cen(i)+12, y_cen(i), [num2str(timesMS(i)) 'ms'], 'HorizontalAlignment', 'center', 'Color', colorNum);
+% end
+% Plot the ellipses first, then the centers of mass
 for i = 1:length(dataFolderList);
-    colorNum = rand(1,3); % Make ellipse border, center, and label the same color for easy identification
-    plot(ellipse_X{1,i}, ellipse_Y{1,i}, 'Color', colorNum, 'Linewidth', 2);
-    plot(x_cen(i), y_cen(i), '*', 'Color', colorNum);
-    text(x_cen(i)+12, y_cen(i), [num2str(timesMS(i)) 'ms'], 'HorizontalAlignment', 'center', 'Color', colorNum);
+    plot(ellipse_X{1,i}, ellipse_Y{1,i}, 'Color', ColorList(i), 'Linewidth', 2);
 end
+for i = 1:length(dataFolderList);
+    plot(x_cen(i), y_cen(i), '*', 'Color', ColorList(i));
+end
+legend(dataFolderList.name);
 xlabel('Pixels (-Z)');
 ylabel('Pixels (-X)');
 title('Full-Width Half-Max of Atomic Cloud');
@@ -158,6 +167,11 @@ hold off
 % Other values include 3.6e-3 and 2.85e-3 (the current value)
 PXtoCM = 2.85e-3;
 [diff_x, diff_y, G_x, G_z, diff_xFit, diff_yFit] = CalculateDiffusionCoefs(times, x_var, y_var, PXtoCM);
+% Print out the diffusion constants and G-factors for easy reference
+disp(['Z Diffusion = ', num2str(diff_x)]);
+disp(['X Diffusion = ', num2str(diff_y)]);
+disp(['Gz = ', num2str(G_z)]);
+disp(['Gx = ', num2str(G_x)]);
 % Make a new figure separate from the FWHM plot
 figure;
 % Plot the diffusion constants (after scaling them by the conversion factor, which is PXtoCM^2)
