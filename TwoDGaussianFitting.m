@@ -15,8 +15,10 @@ function [correctedPic, x_var, y_var, x_cen, y_cen] = TwoDGaussianFitting(parsed
     % x_cen, y_cen = Coordinates of the cloud's center of mass, as
     % determined by the 2D Gaussian fitting
 %%
-image = cat(3,parsedTXTFiles{1:end});
-avgPic = mean(image, 3);
+% Use the "cat" function to "stack" each cell in parsedTXTFiles on top of
+% each other, then average only over the height of the stack
+stackedImages = cat(3,parsedTXTFiles{1:end});
+avgPic = mean(stackedImages, 3);
 % Then pull away whatever the background picks up
 % This is the "corrected picture" of the averaged clouds, taking away
 % whatever light we saw from the background
