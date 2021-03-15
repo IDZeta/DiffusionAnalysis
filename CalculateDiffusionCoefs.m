@@ -32,11 +32,6 @@ h = 6.63e-34;
 RbMass = 1.4e-25;
 G_x = 2*pi*RbMass*(diff_y/10000)/h;
 G_z = 2*pi*RbMass*(diff_x/10000)/h;
-% Print out the diffusion constants and G-factors
-disp(['Z Diffusion = ', num2str(diff_x)]);
-disp(['X Diffusion = ', num2str(diff_y)]);
-disp(['Gz = ', num2str(G_z)]);
-disp(['Gx = ', num2str(G_x)]);
 % Once you have those variables for your line, plug them into a function to
 % get out a set of actualy fitted lines
 diff_xFit = polyval(linFitCoef_x, times);
